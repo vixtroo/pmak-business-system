@@ -21,3 +21,5 @@ app.post('/tshirt/:id', (req, res) => {
   }
   res.status(200).send({ message: `T-shirt with ID ${id} and brand ${brand} with a size ${size} created successfully` });
 });
+
+module.exports = app;
