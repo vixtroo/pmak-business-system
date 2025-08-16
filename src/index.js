@@ -9,7 +9,7 @@ app.listen(PORT, () => {
 });
 
 app.get('/my-love', (req, res) => {
-  res.status(200).send({first_name: 'Christine Chelsey', last_name: 'Sebastian' });
+  res.status(200).send({first_name: 'Christine Chelsey', last_name: 'Castro' });
 });
 
 app.post('/tshirt/:id', (req, res) => { 
