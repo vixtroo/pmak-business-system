@@ -1,16 +1,9 @@
 const express = require('express');
-const app = express();
-const PORT = 8080;
+const router = express.Router();
 const supabase = require('../config/supabase');
 
-app.use(express.json());
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
-
 //CREATE ORDER
-app.post('/create-order', async (req, res) => {
+router.post('/create-order', async (req, res) => {
   const { store, orders } = req.body;
 
   // Validate store
@@ -47,8 +40,8 @@ app.post('/create-order', async (req, res) => {
     .from('orders')
     .insert([
       {
-        store,       // string
-        orders       // array of JSON objects
+        store, // string
+        orders // array of JSON objects
       }
     ])
     .select();
@@ -66,4 +59,4 @@ app.post('/create-order', async (req, res) => {
 }
 });
 
-module.exports = app;
+module.exports = router;
