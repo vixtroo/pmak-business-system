@@ -9,6 +9,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
+//CREATE ORDER
 app.post('/create-order', async (req, res) => {
   const { store, orders } = req.body;
 
@@ -40,31 +41,29 @@ app.post('/create-order', async (req, res) => {
     }
   }
 
-  // Insert into Supabase
-  try {
-    const formattedOrders = orders.map(order => ({
-      store,
-      product: order.product,
-      quantity: order.quantity,
-      price: order.price,
-    }));
+ // Insert into Supabase
+ try {
+  const { data, error } = await supabase
+    .from('orders')
+    .insert([
+      {
+        store,       // string
+        orders       // array of JSON objects
+      }
+    ])
+    .select();
 
-    const { data, error } = await supabase
-      .from('orders')
-      .insert(formattedOrders)
-      .select();
-
-    if (error) {
-      return res.status(500).send({ message: 'Database insert failed', error: error.message });
-    }
-
-    res.status(201).send({
-      message: `Orders at ${store} created successfully`,
-      data
-    });
-  } catch (err) {
-    res.status(500).send({ message: 'Unexpected server error', error: err.message });
+  if (error) {
+    return res.status(500).send({ message: 'Database insert failed', error: error.message });
   }
+
+  res.status(200).send({
+    message: `Order/s at ${store} created successfully`,
+    data
+  });
+} catch (err) {
+  res.status(500).send({ message: 'Unexpected server error', error: err.message });
+}
 });
 
 module.exports = app;
