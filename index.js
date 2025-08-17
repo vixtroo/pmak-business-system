@@ -7,7 +7,7 @@ const PORT = 8080;
 app.use(express.json());
 
 // Import routes
-const orderRoutes = require('./src/routes/orders');
+const orderRoutes = require('./src/routes/orders.js');
 //const productRoutes = require('./src/routes/products');
 
 // Use routes
