@@ -8,18 +8,47 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-app.get('/my-love', (req, res) => {
-  res.status(200).send({first_name: 'Christine Chelsey', last_name: 'Castro' });
-});
+app.post('/create-order', (req, res) => {
+  const { store, orders } = req.body;
 
-app.post('/tshirt/:id', (req, res) => { 
-  const { id } = req.params;
-  const { brand, size, color } = req.body
-
-  if(!brand || !size || !color){
-    res.status(400).send({ message: `Brand, Size, and Color are required` });
+  // Validate store
+  if (!store || typeof store !== 'string' || store.trim() === '') {
+    return res.status(400).send({ message: 'Store is required and must be a string' });
   }
-  res.status(200).send({ message: `T-shirt with ID ${id} and brand ${brand} with a size ${size} created successfully` });
+
+  // Validate orders is an array of JSON objects
+  if (!Array.isArray(orders) || orders.length === 0) {
+    return res.status(400).send({ message: 'Orders must be a non-empty list of JSON objects' });
+  }
+
+  for (let i = 0; i < orders.length; i++) {
+    const order = orders[i];
+
+    // Check object type
+    if (typeof order !== 'object' || order === null || Array.isArray(order)) {
+      return res.status(400).send({ message: `Order ${i + 1} must be a JSON object` });
+    }
+
+    const { product, quantity, price } = order;
+
+    // Validate required fields
+    if (!product || typeof product !== 'string' || product.trim() === '') {
+      return res.status(400).send({ message: `Order ${i + 1}: Product is required and must be a string` });
+    }
+    if (typeof quantity !== 'number' || quantity <= 0) {
+      return res.status(400).send({ message: `Order ${i + 1}: Quantity must be greater than zero` });
+    }
+    if (typeof price !== 'number' || price <= 0) {
+      return res.status(400).send({ message: `Order ${i + 1}: Price must be greater than zero` });
+    }
+  }
+
+  // Success response
+  res.status(200).send({
+    message: `Orders at ${store} created successfully`,
+    orders
+  });
 });
+
 
 module.exports = app;
