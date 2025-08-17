@@ -1,9 +1,9 @@
 {
   "version": 2,
   "builds": [
-    { "src": "src/cafe_republic/index.js", "use": "@vercel/node" }
+    { "src": "src/routes/index.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "src/cafe_republic/index.js" }
+    { "src": "/(.*)", "dest": "src/routes/index.js" }
   ]
 }
