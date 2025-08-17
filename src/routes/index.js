@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
+const supabase = require('../config/supabase');
 
 app.use(express.json());
 
@@ -8,7 +9,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-app.post('/create-order', (req, res) => {
+app.post('/create-order', async (req, res) => {
   const { store, orders } = req.body;
 
   // Validate store
@@ -23,15 +24,11 @@ app.post('/create-order', (req, res) => {
 
   for (let i = 0; i < orders.length; i++) {
     const order = orders[i];
-
-    // Check object type
     if (typeof order !== 'object' || order === null || Array.isArray(order)) {
       return res.status(400).send({ message: `Order ${i + 1} must be a JSON object` });
     }
 
     const { product, quantity, price } = order;
-
-    // Validate required fields
     if (!product || typeof product !== 'string' || product.trim() === '') {
       return res.status(400).send({ message: `Order ${i + 1}: Product is required and must be a string` });
     }
@@ -43,12 +40,31 @@ app.post('/create-order', (req, res) => {
     }
   }
 
-  // Success response
-  res.status(200).send({
-    message: `Orders at ${store} created successfully`,
-    orders
-  });
-});
+  // Insert into Supabase
+  try {
+    const formattedOrders = orders.map(order => ({
+      store,
+      product: order.product,
+      quantity: order.quantity,
+      price: order.price,
+    }));
 
+    const { data, error } = await supabase
+      .from('orders')
+      .insert(formattedOrders)
+      .select();
+
+    if (error) {
+      return res.status(500).send({ message: 'Database insert failed', error: error.message });
+    }
+
+    res.status(201).send({
+      message: `Orders at ${store} created successfully`,
+      data
+    });
+  } catch (err) {
+    res.status(500).send({ message: 'Unexpected server error', error: err.message });
+  }
+});
 
 module.exports = app;
