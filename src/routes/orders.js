@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const supabase = require('../config/supabase');
+const { verifySupabaseToken, verifyApiKey} = require('../middleware/auth');
 
 //CREATE ORDER
-router.post('/create-order', async (req, res) => {
+router.post('/create-order', verifyApiKey, async (req, res) => {
   const { store, orders } = req.body;
 
   // Validate store
@@ -57,6 +58,35 @@ router.post('/create-order', async (req, res) => {
 } catch (err) {
   res.status(500).send({ message: 'Unexpected server error', error: err.message });
 }
+});
+
+//GET LIST OF ORDERS
+router.get('/get-orders', verifyApiKey,  async (req, res) => {
+  const { store } = req.body;
+
+  // Validate store
+  if (!store || typeof store !== 'string' || store.trim() === '') {
+    return res.status(400).send({ message: 'Store is required and must be a string' });
+  }
+
+  // Fetch orders from Supabase
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('store', store);
+
+    if (error) {
+      return res.status(500).send({ message: 'Database fetch failed', error: error.message });
+    }
+
+    res.status(200).send({
+      message: `Orders at ${store} retrieved successfully`,
+      data
+    });
+  } catch (err) {
+    res.status(500).send({ message: 'Unexpected server error', error: err.message });
+  }
 });
 
 module.exports = router;
